@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>ظرف</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ظرف">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0B2545">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="data:image/gif;base64,R0lGODlhAQABAAAAACw=">
+<link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@700&family=Mada:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#FBF9F4;--card:#FFFFFF;--ink:#0B2545;--mute:#51617A;--rule:#E3D9C2;--green:#0F6B4F;--deep:#083F2F;--soft:#EAF3EC;--red:#A12D1F;--amber:#8A5A00;--navy:#0B2545;--onnavy:#FBF9F4}
+@media (prefers-color-scheme:dark){:root{--bg:#07182E;--card:#0F2A4D;--ink:#FBF9F4;--mute:#A9B7CB;--rule:#24406A;--green:#4FB58F;--soft:#12385A;--red:#E58A7D;--amber:#E0B25B}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Mada,Tajawal,system-ui,sans-serif;font-size:16px;padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+header{background:var(--navy);color:var(--onnavy);padding:calc(14px + env(safe-area-inset-top)) 16px 14px;display:flex;align-items:center;gap:10px}
+header .logo{font-family:'Reem Kufi',Mada;font-weight:700;font-size:30px;line-height:1}
+header .sub{font-size:15px;color:#B8C4D6;flex-grow:1;text-align:left}
+main{padding:14px 16px;display:flex;flex-direction:column;gap:12px;max-width:520px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--rule);border-top:4px solid var(--navy);padding:14px 16px}
+.hero .big{font-size:56px;font-weight:700;line-height:1.1}
+.hero .cur{font-size:17px;font-weight:700;color:var(--green);margin-inline-start:6px}
+.mute{color:var(--mute);font-size:15px}
+h2{font-size:20px;margin:6px 0 0;display:flex;align-items:center;gap:8px}
+h2:before{content:"";width:20px;height:2px;background:var(--green)}
+.env{background:var(--card);border:1px solid var(--rule);padding:10px 14px;display:flex;flex-direction:column;gap:6px;cursor:pointer;width:100%;text-align:right;color:inherit;font:inherit}
+.env .r{display:flex;align-items:center;gap:8px}.env .n{font-weight:700;font-size:17px;flex-grow:1}
+.chip{font-size:15px;color:var(--mute);background:var(--soft);padding:0 8px}
+.bar{height:5px;background:var(--soft)}.bar i{display:block;height:100%}
+.banner{border:1px solid var(--rule);border-inline-start:4px solid var(--amber);background:var(--card);padding:10px 14px;font-size:16px}
+.banner.red{border-inline-start-color:var(--red)}
+nav{position:fixed;bottom:0;left:0;right:0;background:var(--deep);display:flex;justify-content:space-around;padding:8px 6px calc(8px + env(safe-area-inset-bottom))}
+nav button{background:none;border:0;border-top:3px solid transparent;color:#B7CFC5;font:inherit;font-size:15px;padding:6px 14px}
+nav button.on{color:#fff;border-top-color:#fff;font-weight:700}
+.sheetbg{position:fixed;inset:0;background:rgba(7,24,46,.55);display:none;align-items:flex-end;z-index:10}
+.sheetbg.on{display:flex}
+.sheet{background:var(--bg);width:100%;max-width:520px;margin:0 auto;padding:18px 16px calc(18px + env(safe-area-inset-bottom));border-top:4px solid var(--navy);display:flex;flex-direction:column;gap:12px;max-height:92vh;overflow:auto}
+.sheet .acc{background:var(--deep);color:#fff;padding:12px 16px}
+.sheet .acc b{font-size:24px;display:block}
+input{width:100%;font:inherit;font-size:34px;font-weight:700;padding:10px 14px;border:1px solid var(--rule);background:var(--card);color:var(--ink);text-align:right}
+input.note{font-size:17px;font-weight:400}
+.btn{height:54px;border:0;background:var(--navy);color:#fff;font:inherit;font-size:19px;font-weight:700;cursor:pointer;width:100%}
+.btn.g{background:var(--green)}.btn.o{background:transparent;color:var(--ink);border:1px solid var(--rule)}
+.opt{display:flex;align-items:center;gap:10px;border:1px solid var(--rule);background:var(--card);padding:10px 14px;cursor:pointer}
+.opt.sel{border-color:var(--green);outline:2px solid var(--green)}
+.warn{border:1px solid var(--rule);border-top:4px solid var(--red);background:var(--card);padding:12px 14px}
+.tx{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--rule);align-items:center}
+.tx b{flex-grow:1}
+.toast{position:fixed;left:16px;right:16px;bottom:calc(96px + env(safe-area-inset-bottom));background:var(--navy);color:#fff;padding:12px 16px;display:none;z-index:20;text-align:center}
+.toast.on{display:block}
+.hide{display:none}
+</style>
+</head>
+<body>
+<header><span class="logo">ظرف</span><span class="sub" id="cyc"></span></header>
+<main id="main"></main>
+<nav>
+  <button id="t-home" class="on" onclick="tab('home')">الرئيسية</button>
+  <button id="t-log" onclick="tab('log')">السجل</button>
+  <button id="t-more" onclick="tab('more')">المزيد</button>
+</nav>
+<div class="sheetbg" id="bg"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+var API = 'https://script.google.com/macros/s/AKfycbwBRzr9kc4mm76XAjG6wqE4E7_gwuXB_BJgP9m_6OzZ5-K3RsurtdBbTIM55QbqThooIQ/exec';
+var $ = function (id) { return document.getElementById(id); };
+var state = null, recent = [], view = 'home';
+var token = lsGet('zarf_token');
+
+function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+function fmt(n) { return Math.round(Number(n) || 0).toLocaleString('en-US'); }
+function toast(t) { var e = $('toast'); e.textContent = t; e.classList.add('on'); setTimeout(function () { e.classList.remove('on'); }, 2600); }
+
+function today() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+
+function get(action, extra) {
+  return fetch(API + '?action=' + action + '&token=' + encodeURIComponent(token) + (extra || '')).then(function (r) { return r.json(); });
+}
+function post(body) {
+  body.token = token;
+  return fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) }).then(function (r) { return r.json(); });
+}
+
+/* ---------- الطابور بدون إنترنت ---------- */
+function queue() { try { return JSON.parse(lsGet('zarf_q') || '[]'); } catch (e) { return []; } }
+function saveQ(q) { lsSet('zarf_q', JSON.stringify(q)); }
+function flush() {
+  var q = queue();
+  if (!q.length || !navigator.onLine) return Promise.resolve();
+  var item = q[0];
+  return post(JSON.parse(JSON.stringify(item))).then(function (res) {
+    if (res && res.ok) { q.shift(); saveQ(q); toast('تم رفع عملية محفوظة'); return flush(); }
+    q.shift(); saveQ(q); return flush();
+  }).catch(function () {});
+}
+
+/* ---------- تحميل ---------- */
+function load() {
+  if (!token) return setup();
+  var cached = lsGet('zarf_state');
+  if (cached && !state) { try { state = JSON.parse(cached); render(); } catch (e) {} }
+  flush().then(function () { return get('state'); }).then(function (r) {
+    if (!r.ok) { if (r.error === 'غير مصرح') { token = null; lsSet('zarf_token', ''); return setup(); } throw new Error(r.error); }
+    state = r.data; lsSet('zarf_state', JSON.stringify(state)); render();
+  }).catch(function () { if (state) { render(true); } else { $('main').innerHTML = '<div class="warn">تعذّر الاتصال. تأكد من الإنترنت.</div>'; } });
+}
+
+function setup() {
+  $('main').innerHTML = '<div class="card"><h2 style="margin:0 0 10px">أول مرة</h2><p class="mute">الصق الرمز السري الذي أنشأته من Apps Script.</p><input id="tk" class="note" placeholder="الرمز السري" style="direction:ltr;text-align:left"><div style="height:10px"></div><button class="btn g" onclick="saveToken()">حفظ</button></div>';
+}
+function saveToken() { token = $('tk').value.trim(); if (!token) return; lsSet('zarf_token', token); load(); }
+
+/* ---------- الشاشات ---------- */
+function tab(v) {
+  view = v;
+  ['home', 'log', 'more'].forEach(function (x) { $('t-' + x).classList.toggle('on', x === v); });
+  if (v === 'log') { get('recent', '&n=30').then(function (r) { recent = r.ok ? r.data : []; render(); }).catch(function () { render(); }); }
+  render();
+}
+
+function color(e) { if (e.left < 0) return 'var(--red)'; if (e.pct >= 0.9) return 'var(--amber)'; return 'var(--green)'; }
+
+function render(offline) {
+  if (!state) return;
+  $('cyc').textContent = state.cycleStart + ' ← ' + state.cycleEnd;
+  var m = $('main'), h = '';
+  if (view === 'home') {
+    var d = state.daysSinceEntry;
+    if (offline) h += '<div class="banner">أنت بدون اتصال. الأرقام من آخر تحديث.</div>';
+    if (d != null && d >= 3) h += '<div class="banner red">ما سجلت من ' + d + ' أيام. الأرقام هنا تقريبية. دقيقة وحدة تلحق.</div>';
+    else if (d != null && d >= 2) h += '<div class="banner">ما سجلت من يومين. تقدر تلحق بدقيقة؟</div>';
+    var approx = d != null && d >= 3 ? '≈ ' : '';
+    h += '<div class="card hero"><div class="mute">اليوم تقدر تصرف من الصرف الحر</div><div><span class="big">' + approx + fmt(Math.max(0, state.freePerDay)) + '</span><span class="cur">ر.س</span></div><div class="mute">المتبقي ' + fmt(state.freeLeft) + ' · باقي ' + state.daysLeft + ' يوم</div></div>';
+    h += '<h2>الأسبوعية</h2>';
+    state.weekly.forEach(function (w) {
+      h += '<button class="env" onclick="openPay(\'' + esc(w.name) + '\')"><div class="r"><span class="n">' + esc(w.name) + '</span><span class="mute">هذا الأسبوع حوالي</span><b>' + fmt(w.perWeek) + '</b></div></button>';
+    });
+    h += '<h2>الأظرف</h2>';
+    state.envelopes.filter(function (e) { return e.type === 'متغير'; }).forEach(function (e) {
+      h += '<button class="env" onclick="openPay(\'' + esc(e.name) + '\')"><div class="r"><span class="n">' + esc(e.name) + '</span><span class="chip">' + esc(e.account) + '</span><b style="color:' + color(e) + '">' + fmt(e.left) + '</b></div><div class="bar"><i style="width:' + Math.min(100, Math.round(e.pct * 100)) + '%;background:' + color(e) + '"></i></div></button>';
+    });
+    h += '<button class="env" style="border-top:4px solid var(--red)" onclick="openPay(\'الاحتياطي\',\'طارئ\')"><div class="r"><span class="n">طارئ</span><span class="mute">يسحب من الاحتياطي</span></div></button>';
+  } else if (view === 'log') {
+    h += '<h2>آخر العمليات</h2>';
+    if (!recent.length) h += '<div class="mute">لا توجد عمليات بعد.</div>';
+    recent.forEach(function (t) {
+      h += '<div class="tx"><div><b>' + esc(t.envelope) + '</b><div class="mute">' + esc(t.date) + ' ' + esc(t.time) + (t.note ? ' · ' + esc(t.note) : '') + (t.type === 'طارئ' ? ' · طارئ' : '') + '</div></div><b>' + fmt(t.amount) + '</b></div>';
+    });
+  } else {
+    h += '<h2>المزيد</h2><div class="card"><p class="mute">العمليات المحفوظة على الجوال: ' + queue().length + '</p><button class="btn o" onclick="load()">تحديث</button><div style="height:10px"></div><button class="btn o" onclick="lsSet(\'zarf_token\',\'\');token=null;setup()">تغيير الرمز السري</button></div>';
+    h += '<h2>الأظرف المحوَّلة</h2>';
+    state.envelopes.filter(function (e) { return e.type !== 'متغير'; }).forEach(function (e) {
+      h += '<div class="env" style="cursor:default"><div class="r"><span class="n">' + esc(e.name) + '</span><span class="chip">' + esc(e.account) + '</span><b>' + fmt(e.budget) + '</b></div></div>';
+    });
+  }
+  m.innerHTML = h;
+}
+
+/* ---------- شاشة قبل ما أدفع ---------- */
+var cur = null, curType = 'صرف', lender = null;
+function openPay(name, type) {
+  cur = state.envelopes.filter(function (e) { return e.name === name; })[0];
+  curType = type || 'صرف'; lender = null;
+  $('sheet').innerHTML =
+    '<div class="acc"><span style="color:#B7CFC5;font-size:15px">ادفع من هذا الحساب</span><b>' + esc(cur.account) + '</b>' +
+    '<div style="display:flex;gap:24px;margin-top:6px"><div><span style="color:#B7CFC5;font-size:15px">رصيد «' + esc(cur.name) + '» الآن</span><div style="font-size:22px;font-weight:700">' + fmt(cur.left) + '</div></div><div><span style="color:#B7CFC5;font-size:15px">بعد الدفع</span><div id="after" style="font-size:22px;font-weight:700">' + fmt(cur.left) + '</div></div></div></div>' +
+    '<input id="amt" type="number" inputmode="decimal" placeholder="المبلغ" oninput="onAmt()">' +
+    '<input id="note" class="note" placeholder="ملاحظة (اختياري)">' +
+    '<div id="warn"></div>' +
+    '<button class="btn g" id="go" onclick="submitTx()">سجّل</button>' +
+    '<button class="btn o" onclick="closeSheet()">إلغاء</button>';
+  $('bg').classList.add('on');
+  setTimeout(function () { $('amt').focus(); }, 100);
+}
+function closeSheet() { $('bg').classList.remove('on'); }
+$('bg').addEventListener('click', function (e) { if (e.target === $('bg')) closeSheet(); });
+
+function onAmt() {
+  var a = Number($('amt').value) || 0;
+  $('after').textContent = fmt(cur.left - a);
+  var w = $('warn');
+  if (a > cur.left && a > 0 && curType !== 'طارئ') {
+    var opts = state.envelopes.filter(function (e) { return e.lendable && e.name !== cur.name && e.left >= a - cur.left; });
+    var need = a - cur.left;
+    var hh = '<div class="warn"><b>رصيد «' + esc(cur.name) + '» لا يكفي.</b><div class="mute">ينقصك ' + fmt(need) + '. تقدر تستلف من ظرف آخر، ويُسوّى في دورة الراتب القادمة.</div><div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">';
+    if (!opts.length) hh += '<div class="mute">لا يوجد ظرف يكفي للاستلاف.</div>';
+    opts.forEach(function (e) {
+      hh += '<div class="opt' + (lender === e.name ? ' sel' : '') + '" onclick="pickLender(\'' + esc(e.name) + '\')"><b style="flex-grow:1">' + esc(e.name) + '</b><span class="mute">متاح ' + fmt(e.left) + '</span></div>';
+    });
+    hh += '</div></div>';
+    w.innerHTML = hh;
+  } else { w.innerHTML = ''; lender = null; }
+}
+function pickLender(n) { lender = n; onAmt(); }
+
+function submitTx() {
+  var a = Number($('amt').value);
+  if (!(a > 0)) { toast('اكتب المبلغ'); return; }
+  var note = $('note').value;
+  var short = curType !== 'طارئ' && a > cur.left;
+  if (short && !lender) { toast('اختر ظرفاً للاستلاف منه'); return; }
+  $('go').disabled = true; $('go').textContent = '...';
+  var steps = Promise.resolve();
+  if (short) {
+    var need = a - cur.left;
+    steps = post({ action: 'borrow', from: lender, to: cur.name, amount: need }).then(function (r) { if (!r.ok) throw new Error(r.error); });
+  }
+  var body = { action: 'add', envelope: cur.name, amount: a, note: note, type: curType, date: today() };
+  steps.then(function () { return post(body); }).then(function (r) {
+    if (!r.ok) throw new Error(r.error);
+    state = r.data; lsSet('zarf_state', JSON.stringify(state));
+    closeSheet(); render(); toast('تم التسجيل');
+  }).catch(function (err) {
+    if (!navigator.onLine || /fetch|network|Failed/i.test(String(err))) {
+      if (!short) { var q = queue(); q.push(body); saveQ(q); closeSheet(); toast('محفوظ على الجوال، يُرفع عند عودة الإنترنت'); return; }
+    }
+    $('go').disabled = false; $('go').textContent = 'سجّل'; toast(err.message || 'تعذّر التسجيل');
+  });
+}
+
+/* أيقونة الشاشة الرئيسية: تُرسم بخط الكوفي على جوالك */
+function makeIcon() {
+  try {
+    var c = document.createElement('canvas'); c.width = 180; c.height = 180;
+    var x = c.getContext('2d');
+    x.fillStyle = '#0B2545'; x.fillRect(0, 0, 180, 180);
+    x.fillStyle = '#FBF9F4'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.direction = 'rtl';
+    x.font = '700 92px "Reem Kufi", sans-serif';
+    x.fillText('ظرف', 90, 98);
+    var l = document.querySelector('link[rel="apple-touch-icon"]');
+    l.href = c.toDataURL('image/png');
+  } catch (e) {}
+}
+if (document.fonts && document.fonts.load) { document.fonts.load('700 92px "Reem Kufi"', 'ظرف').then(makeIcon, makeIcon); } else { makeIcon(); }
+
+window.addEventListener('online', flush);
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(function () {}); }
+load();
+</script>
+</body>
+</html>
