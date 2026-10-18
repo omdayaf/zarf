@@ -19,3 +19,24 @@ self.addEventListener('fetch', function (e) {
     return r;
   }).catch(function () { return caches.match(e.request); }));
 });
+
+self.addEventListener('push', function (e) {
+  e.waitUntil((async function () {
+    var title = 'ظرف', body = 'سجّل مصروفك اليوم.';
+    try {
+      var c = await caches.open('zarf-cfg');
+      var r = await c.match('https://zarf.local/cfg');
+      if (r) {
+        var cfg = await r.json();
+        var m = await fetch(cfg.push.replace(/\/$/, '') + '/msg?t=' + encodeURIComponent(cfg.token));
+        var j = await m.json();
+        title = j.title || title; body = j.body || body;
+      }
+    } catch (err) {}
+    await self.registration.showNotification(title, { body: body, dir: 'rtl', lang: 'ar' });
+  })());
+});
+self.addEventListener('notificationclick', function (e) {
+  e.notification.close();
+  e.waitUntil(clients.openWindow('./'));
+});
