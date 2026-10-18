@@ -148,6 +148,17 @@ function render(offline) {
     if (dd != null && dd >= 3) h += '<div class="banner red">ما سجلت من ' + dd + ' أيام. الأرقام تقريبية. دقيقة وحدة تلحق.</div>';
     else if (dd != null && dd >= 2) h += '<div class="banner">ما سجلت من يومين. تقدر تلحق بدقيقة؟</div>';
     var approx = dd != null && dd >= 3 ? '≈ ' : '';
+    if (state.daysLeft <= 7) {
+      var lw = '<div class="hero" style="border-color:rgba(240,180,41,.6)"><div class="l">آخر أسبوع قبل الراتب · باقي ' + state.daysLeft + ' يوم</div>';
+      var over = 0;
+      state.envelopes.forEach(function (e) {
+        if (e.type !== 'متغير') return;
+        if (e.left < 0) over++;
+        lw += '<div class="rw" style="display:flex;justify-content:space-between;font-size:14px"><span>' + esc(e.name) + '</span><b style="color:' + (e.left < 0 ? 'var(--red)' : 'var(--green)') + '">' + fmt(e.left) + '</b></div>';
+      });
+      lw += '<div style="font-size:13px;color:var(--mute)">' + (over ? 'عندك ' + over + ' ظرف تجاوز ميزانيته. تتسوّى من الاستلاف يوم الراتب.' : 'كل الأظرف سليمة. الباقي يروح لك أو للادخار حسب قرارك.') + '</div></div>';
+      h += lw;
+    }
     var vars = state.envelopes.filter(function (e) { return e.type === 'متغير'; });
     var tb = 0, ts = 0; vars.forEach(function (e) { tb += e.budget; ts += e.spent; });
     var pct = tb ? Math.min(100, Math.round(ts / tb * 100)) : 0;
