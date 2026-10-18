@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>ظرف · لوحة التحكم</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#F6F3EA;color:#1F2937;font-family:Cairo,sans-serif}
+.hd{background:linear-gradient(120deg,#0B1F3A 0%,#16305A 100%);border-bottom:4px solid #C9A227;display:flex;align-items:center;padding:18px 32px;gap:14px;flex-wrap:wrap}
+.hd .t{flex-grow:1;min-width:200px}.hd h1{margin:0;font-size:30px;font-weight:800;color:#fff}.hd p{margin:2px 0 0;font-size:13px;color:#C9D3E6}
+.gp{font-size:14px;font-weight:700;color:#0B1F3A;background:#C9A227;border-radius:999px;padding:6px 18px}
+.op{font-size:14px;font-weight:700;color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:6px 18px}
+.wrap{max-width:1280px;margin:0 auto;padding:24px 32px;display:flex;flex-direction:column;gap:20px}
+.kp{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+.k{background:#fff;border:1px solid #E6E0D0;border-radius:18px;padding:16px 18px}
+.k .a{font-size:13px;color:#6B7280;font-weight:600}.k .b{font-size:30px;font-weight:800;color:#0B1F3A;margin-top:4px}.k .b small{font-size:13px;color:#8A6D0B;font-weight:700}.k .c{font-size:12px;color:#6B7280}
+.hl{background:#0B1F3A;border-radius:18px;padding:14px 18px;display:flex;align-items:center;gap:14px}
+.ring{position:relative;width:72px;height:72px;flex:none}.ring div{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:800}
+.row2{display:grid;grid-template-columns:1.3fr 1fr;gap:20px}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.cd{background:#fff;border:1px solid #E6E0D0;border-radius:20px;padding:18px 20px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.cd h2{margin:0;font-size:17px;font-weight:800;color:#0B1F3A}
+.tr{display:grid;grid-template-columns:1.7fr .8fr .8fr .8fr 1.6fr;gap:10px;align-items:center;padding:7px 4px;border-bottom:1px solid #F0ECDF}
+.tr.h{font-size:12px;font-weight:700;color:#6B7280;border-bottom:1px solid #E6E0D0}
+.pill{font-size:11px;font-weight:800;border-radius:999px;padding:2px 10px;white-space:nowrap}
+.bar{flex-grow:1;height:8px;border-radius:99px;background:#EEE9DB;overflow:hidden}.bar i{display:block;height:100%;border-radius:99px}
+.q{margin-top:auto;background:#F6F3EA;border-radius:14px;padding:12px 14px;font-size:13px;line-height:1.7}
+.ln{height:10px;border-radius:99px;background:#EEE9DB;overflow:hidden}.ln i{display:block;height:100%;border-radius:99px}
+.rc{display:flex;align-items:center;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid #F0ECDF}
+.msg{padding:40px;text-align:center;color:#6B7280}
+.msg input{font:inherit;padding:10px 14px;border-radius:12px;border:1px solid #E6E0D0;width:min(380px,90%);direction:ltr}
+.msg button{font:inherit;font-weight:800;margin-top:12px;padding:10px 28px;border:0;border-radius:12px;background:#C9A227;color:#0B1F3A;cursor:pointer}
+@media(max-width:1000px){.kp{grid-template-columns:repeat(2,1fr)}.row2,.row3{grid-template-columns:1fr}.wrap{padding:16px}.hd{padding:16px}.hd h1{font-size:24px}}
+</style>
+</head>
+<body>
+<div class="hd"><div class="t"><h1>لوحة التحكم المالية</h1><p>كل ريال له ظرف · كل ظرف له حساب</p></div><span class="gp" id="rng"></span><span class="op" id="dy"></span></div>
+<div class="wrap" id="app"><div class="msg">جاري التحميل…</div></div>
+<script>
+var API='https://script.google.com/macros/s/AKfycbwBRzr9kc4mm76XAjG6wqE4E7_gwuXB_BJgP9m_6OzZ5-K3RsurtdBbTIM55QbqThooIQ/exec';
+var NAV='#0B1F3A',GOLD='#C9A227',OK='#3DAA79',AMB='#E5A12E',RED='#D94B4B';
+function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch(e){return null;}}
+function $(i){return document.getElementById(i);}
+function f(n){return Math.round(Number(n)||0).toLocaleString('en-US');}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function ask(){$('app').innerHTML='<div class="msg"><p>الصق الرمز السري (مرة وحدة على هذا الجهاز)</p><input id="tk" placeholder="الرمز السري"><br><button onclick="saveTk()">دخول</button></div>';}
+function saveTk(){var v=$('tk').value.trim();if(v){ls('zarf_token',v);go();}}
+function get(a,t){return fetch(API+'?action='+a+'&token='+encodeURIComponent(t)).then(function(r){return r.json();});}
+function go(){
+  var t=ls('zarf_token');if(!t){ask();return;}
+  Promise.all([get('report',t),get('accounts',t)]).then(function(x){
+    if(!x[0].ok){ls('zarf_token','');ask();return;}
+    draw(x[0].data,x[1].ok?x[1].data:[]);
+  }).catch(function(){$('app').innerHTML='<div class="msg">تعذّر الاتصال. حدّث الصفحة.</div>';});
+}
+function status(e){
+  if(e.type!=='متغير')return{t:'محوَّل',bg:'#E8EEF9',fg:NAV,bar:GOLD,p:100,c:'#1F2937'};
+  if(e.left<0)return{t:'تجاوز',bg:'#FEE4E2',fg:'#B42318',bar:RED,p:100,c:'#B42318'};
+  if(e.left===0)return{t:'خلص',bg:'#FEE4E2',fg:'#B42318',bar:RED,p:100,c:'#B42318'};
+  var p=Math.min(100,Math.round(e.pct*100));
+  if(e.pct>=0.9)return{t:'قريب',bg:'#FEF0C7',fg:'#B54708',bar:AMB,p:p,c:'#B54708'};
+  return{t:'آمن',bg:'#DCFAE6',fg:'#067647',bar:OK,p:p,c:'#067647'};
+}
+function chart(pc){
+  var X0=40,X1=480,Y0=190,Y1=20,tot=pc.total,max=Math.max(pc.budget,pc.actual.length?pc.actual[pc.actual.length-1]:0,1)*1.02;
+  var sx=function(d){return X0+(X1-X0)*(d/tot);},sy=function(v){return Y0-(Y0-Y1)*(v/max);};
+  var h='<svg width="100%" viewBox="0 0 500 250" role="img" aria-label="وتيرة الصرف"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C9A227" stop-opacity=".35"/><stop offset="1" stop-color="#C9A227" stop-opacity="0"/></linearGradient></defs>';
+  for(var i=0;i<=4;i++){var y=Y0-(Y0-Y1)*i/4;h+='<path d="M40 '+y+'H480" stroke="#EEE9DB"/><text x="34" y="'+(y+4)+'" font-family="Cairo" font-size="11" fill="#6B7280" text-anchor="end">'+f(max*i/4)+'</text>';}
+  [0,10,20,tot].forEach(function(d){h+='<text x="'+sx(d)+'" y="210" font-family="Cairo" font-size="11" fill="#6B7280" text-anchor="middle">'+(d||1)+'</text>';});
+  h+='<path d="M'+sx(0)+' '+sy(0)+'L'+sx(tot)+' '+sy(pc.budget)+'" stroke="#0B1F3A" stroke-width="2" stroke-dasharray="6 5" fill="none"/>';
+  var a=pc.actual;
+  if(a.length){
+    var pts=[[sx(0),sy(0)]];a.forEach(function(v,i){pts.push([sx(i+1),sy(v)]);});
+    var d='M'+pts.map(function(p){return p[0].toFixed(1)+' '+p[1].toFixed(1);}).join('L');
+    var last=pts[pts.length-1];
+    h+='<path d="'+d+'L'+last[0]+' '+Y0+'L'+X0+' '+Y0+'Z" fill="url(#g)"/><path d="'+d+'" stroke="#C9A227" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="'+last[0]+'" cy="'+last[1]+'" r="6" fill="#C9A227" stroke="#fff" stroke-width="2.5"/><path d="M'+last[0]+' '+last[1]+'V'+Y0+'" stroke="#C9A227" stroke-dasharray="3 4"/><text x="'+last[0]+'" y="232" font-family="Cairo" font-size="12" font-weight="700" fill="#8A6D0B" text-anchor="middle">اليوم</text>';
+  }
+  return h+'</svg>';
+}
+function draw(r,accs){
+  $('rng').textContent=r.cycleStart+' ← '+r.cycleEnd;
+  $('dy').textContent='اليوم '+r.pace.today+' من '+r.pace.total;
+  var left=r.budgetVar-r.spentVar,per=Math.max(0,left)/Math.max(1,r.daysLeft),pct=r.budgetVar?Math.round(r.spentVar/r.budgetVar*100):0;
+  var sc=r.score,lab=sc>=85?'ممتازة':sc>=65?'جيدة جداً':sc>=45?'تحتاج انتباه':'حرجة';
+  var h='<div class="kp">'+
+   '<div class="k"><div class="a">المتبقي في الأظرف</div><div class="b" style="color:#067647">'+f(left)+' <small>ر.س</small></div><div class="c">≈ '+f(per)+' ر.س يومياً · '+r.daysLeft+' يوماً</div></div>'+
+   '<div class="k"><div class="a">المصروف المتغير</div><div class="b">'+f(r.spentVar)+' <small>ر.س</small></div><div class="c">من '+f(r.budgetVar)+' · '+pct+'%</div></div>'+
+   '<div class="k"><div class="a">المحوَّل للادخار</div><div class="b">'+f(r.savings)+' <small>ر.س</small></div><div class="c" style="color:#067647;font-weight:700">'+(r.income?'+ دخل إضافي '+f(r.income):'محوَّل من أول يوم')+'</div></div>'+
+   '<div class="k"><div class="a">للصرف الحر اليوم</div><div class="b">'+f(Math.max(0,r.freePerDay))+' <small>ر.س</small></div><div class="c">شخصي + ترفيه عائلي</div></div>'+
+   '<div class="hl"><div class="ring"><svg width="72" height="72" viewBox="0 0 72 72"><circle cx="36" cy="36" r="30" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="7"/><circle cx="36" cy="36" r="30" fill="none" stroke="#C9A227" stroke-width="7" stroke-linecap="round" stroke-dasharray="'+(188.5*sc/100).toFixed(1)+' 188.5" transform="rotate(-90 36 36)"/></svg><div>'+sc+'</div></div><div><div style="font-size:13px;color:#C9D3E6;font-weight:600">صحة الشهر</div><div style="font-size:16px;font-weight:800;color:#F0D78A">'+lab+'</div></div></div></div>';
+  h+='<div class="row2"><div class="cd"><h2>الأظرف وحساباتها</h2><div class="tr h"><span>الظرف · الحساب</span><span>الميزانية</span><span>المنصرف</span><span>المتبقي</span><span>الحالة</span></div>';
+  r.envelopes.forEach(function(e){
+    var s=status(e),fx=e.type!=='متغير';
+    h+='<div class="tr"><div style="display:flex;flex-direction:column"><b style="font-size:14px">'+esc(e.name)+'</b><span style="font-size:11px;color:#6B7280">'+esc(e.account)+'</span></div><span style="font-weight:600">'+f(e.budget)+'</span><span style="font-weight:600">'+(fx?'—':f(e.spent))+'</span><b style="color:'+s.c+'">'+f(e.left)+'</b><div style="display:flex;align-items:center;gap:8px"><div class="bar"><i style="width:'+s.p+'%;background:'+s.bar+'"></i></div><span class="pill" style="background:'+s.bg+';color:'+s.fg+'">'+s.t+'</span></div></div>';
+  });
+  h+='</div>';
+  var pc=r.pace,ideal=pc.budget*pc.today/pc.total,act=pc.actual.length?pc.actual[pc.actual.length-1]:0,diff=Math.round(act-ideal);
+  var pill=diff>0?'<span class="pill" style="background:#FEF0C7;color:#B54708">فوق المثالية بـ '+f(diff)+' ر.س</span>':'<span class="pill" style="background:#DCFAE6;color:#067647">تحت المثالية بـ '+f(-diff)+' ر.س</span>';
+  var done=r.envelopes.filter(function(e){return e.type==='متغير'&&e.left<=0;}).map(function(e){return e.name;});
+  var q=(done.length?'ظرف «'+done.join('» و«')+'» خلص قبل نهاية الدورة. ':'كل الأظرف المتغيرة ما زالت فيها ميزانية. ')+'باقي '+r.daysLeft+' يوماً بميزانية '+f(left)+' ر.س، أي ≈ '+f(per)+' ر.س يومياً.';
+  h+='<div class="cd"><div style="display:flex;align-items:center;justify-content:space-between"><h2>وتيرة الصرف التراكمية</h2>'+pill+'</div>'+chart(pc)+
+    '<div style="display:flex;gap:18px;font-size:12px;color:#6B7280"><span><span style="display:inline-block;width:18px;height:3px;background:#C9A227;border-radius:9px;vertical-align:middle;margin-inline-end:6px"></span>الفعلي</span><span><span style="display:inline-block;width:18px;border-top:2px dashed #0B1F3A;vertical-align:middle;margin-inline-end:6px"></span>الوتيرة المثالية</span></div><div class="q"><b style="color:#0B1F3A">قراءة سريعة:</b> '+esc(q)+'</div></div></div>';
+  h+='<div class="row3"><div class="cd"><h2>القروض</h2>';
+  r.loans.forEach(function(l,i){var p=l.total?Math.round(l.paid/l.total*100):0;h+='<div style="display:flex;flex-direction:column;gap:6px;margin-top:6px"><div style="display:flex;justify-content:space-between;font-size:13px"><b>'+esc(l.name)+'</b><span style="color:#6B7280">'+l.paid+' من '+l.total+' قسطاً</span></div><div class="ln"><i style="width:'+p+'%;background:'+(i?GOLD:NAV)+'"></i></div><div style="font-size:12px;color:#6B7280">القسط '+f(l.monthly)+' · المتبقي '+f(l.rest)+' ر.س</div></div>';});
+  var tp=r.pending.reduce(function(a,p){return a+Number(p.amount);},0);
+  h+='</div><div class="cd"><div style="display:flex;justify-content:space-between;align-items:center"><h2>الاستلافات المعلّقة</h2>'+(tp?'<span class="pill" style="background:#FEF0C7;color:#B54708">'+f(tp)+' ر.س</span>':'')+'</div>';
+  if(!r.pending.length)h+='<div class="q" style="margin-top:0">لا يوجد استلاف معلّق.</div>';
+  r.pending.forEach(function(p){h+='<div class="q" style="margin-top:0"><b>'+esc(p.to)+' ← '+esc(p.from)+'</b><div style="font-size:12px;color:#6B7280">استلاف '+f(p.amount)+' ر.س</div><div style="font-size:12px;color:#067647;font-weight:700">يُسوّى يوم الراتب.</div></div>';});
+  h+='<div style="font-size:12px;color:#6B7280">السنوي والاحتياطي والأقساط مغلقة للاستلاف.</div></div><div class="cd"><div style="display:flex;justify-content:space-between;align-items:center"><h2>مطابقة الحسابات</h2><span style="font-size:12px;color:#6B7280">التطبيق مقابل البنك</span></div>';
+  accs.forEach(function(a){
+    var t,bg,fg,nums='—';
+    if(!a.last){t=a.opening?'لم يُفحص':'بلا بداية';bg='#EEE9DB';fg='#6B7280';if(a.expected!=null)nums=f(a.expected)+' / —';}
+    else{nums=f(a.expected)+' / '+f(a.last.balance);var d=Math.abs(a.last.diff);if(d<1){t='مطابق';bg='#DCFAE6';fg='#067647';}else{t='فرق '+f(a.last.diff);bg='#FEF0C7';fg='#B54708';}}
+    h+='<div class="rc"><b>'+esc(a.account)+'</b><span style="color:#6B7280">'+nums+'</span><span class="pill" style="background:'+bg+';color:'+fg+'">'+t+'</span></div>';
+  });
+  h+='</div></div>';
+  $('app').innerHTML=h;
+}
+go();
+</script>
+</body>
+</html>
