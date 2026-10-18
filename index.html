@@ -74,6 +74,7 @@ nav .plus{width:66px;height:66px;margin-top:-30px;border-radius:50%;border:4px s
   <button class="n on" id="t-home" onclick="tab('home')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>الرئيسية</button>
   <button class="n" id="t-log" onclick="tab('log')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>السجل</button>
   <button class="plus" aria-label="قبل ما أدفع" onclick="openPay()"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
+  <button class="n" id="t-rep" onclick="tab('rep')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>التقارير</button>
   <button class="n" id="t-more" onclick="tab('more')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>المزيد</button>
 </nav>
 
@@ -126,7 +127,10 @@ function saveToken() { token = $('tk').value.trim(); if (!token) return; lsSet('
 
 function tab(v) {
   view = v;
-  ['home', 'log', 'more'].forEach(function (x) { $('t-' + x).classList.toggle('on', x === v); });
+  ['home', 'log', 'rep', 'more'].forEach(function (x) { $('t-' + x).classList.toggle('on', x === v || (x === 'more' && (v === 'payday' || v === 'recon'))); });
+  if (v === 'rep') { get('report').then(function (r) { rep = r.ok ? r.data : null; render(); }).catch(function () { render(); }); }
+  if (v === 'payday') { get('payday').then(function (r) { payday = r.ok ? r.data : []; render(); }).catch(function () { render(); }); }
+  if (v === 'recon') { get('accounts').then(function (r) { accs = r.ok ? r.data : []; render(); }).catch(function () { render(); }); }
   if (v === 'log') { get('recent', '&n=30').then(function (r) { recent = r.ok ? r.data : []; render(); }).catch(function () { render(); }); }
   render();
 }
@@ -165,8 +169,47 @@ function render(offline) {
     recent.forEach(function (t) {
       h += '<div class="tx"><div><b>' + esc(t.envelope) + '</b><div style="font-size:12px;color:var(--mute)">' + esc(t.date) + ' ' + esc(t.time) + (t.note ? ' · ' + esc(t.note) : '') + (t.type === 'طارئ' ? ' · طارئ' : '') + '</div></div><b style="flex-grow:0">' + fmt(t.amount) + '</b></div>';
     });
+  } else if (view === 'rep') {
+    if (!rep) h += '<div style="color:var(--mute)">جاري التحميل…</div>';
+    else {
+      var sc = rep.score, sl = sc >= 85 ? 'ممتاز' : sc >= 65 ? 'جيد' : 'يحتاج انتباه';
+      h += '<div class="hero"><div class="l">درجة الدورة</div><div><span class="big">' + sc + '</span><span class="cur">من 100 · ' + sl + '</span></div><div class="track"><i style="width:' + sc + '%"></i></div></div>';
+      h += '<div class="box"><div class="rw"><span>ميزانية المتغير</span><b>' + fmt(rep.budgetVar) + '</b></div><div class="rw"><span>المصروف</span><b>' + fmt(rep.spentVar) + '</b></div><div class="rw"><span>المتبقي</span><b style="color:var(--green)">' + fmt(rep.budgetVar - rep.spentVar) + '</b></div><div class="rw"><span>للادخار هذي الدورة</span><b>' + fmt(rep.savings) + '</b></div>' + (rep.income ? '<div class="rw"><span>دخل إضافي</span><b>' + fmt(rep.income) + '</b></div>' : '') + '</div>';
+      h += '<div class="sec"><b>الأظرف</b></div>';
+      rep.envelopes.forEach(function (e) {
+        if (e.type !== 'متغير') return;
+        h += '<div class="env" style="cursor:default"><div class="r"><span class="n">' + esc(e.name) + '</span><span class="chip">' + fmt(e.spent) + ' من ' + fmt(e.budget) + '</span></div><div class="bar"><i style="width:' + Math.min(100, Math.round(e.pct * 100)) + '%;background:' + color(e) + '"></i></div></div>';
+      });
+      if (rep.pending.length) {
+        h += '<div class="sec"><b>استلاف معلّق</b></div>';
+        rep.pending.forEach(function (p) { h += '<div class="banner">' + esc(p.to) + ' استلف ' + fmt(p.amount) + ' من ' + esc(p.from) + '. يُسوّى يوم الراتب.</div>'; });
+      }
+      h += '<div class="sec"><b>القروض</b></div>';
+      rep.loans.forEach(function (l) {
+        var pc = l.total ? Math.round(l.paid / l.total * 100) : 0;
+        h += '<div class="env" style="cursor:default"><div class="r"><span class="n">' + esc(l.name) + '</span><span class="chip">' + l.paid + ' من ' + l.total + '</span><b>' + fmt(l.rest) + '</b></div><div class="bar"><i style="width:' + pc + '%;background:var(--gold)"></i></div></div>';
+      });
+    }
+  } else if (view === 'payday') {
+    h += '<div class="sec"><b>يوم الراتب</b></div><div class="hero"><div class="l">حوّل كل مبلغ من حساب الراتب ثم علّم عليه. التسوية محسوبة تلقائياً.</div></div>';
+    if (!payday.length) h += '<div style="color:var(--mute)">جاري التحميل…</div>';
+    payday.forEach(function (p) {
+      h += '<div class="opt' + (p.done ? ' sel' : '') + '" onclick="togglePay(' + p.row + ',' + (!p.done) + ')"><div style="flex-grow:1"><b>' + esc(p.envelope) + '</b><div style="font-size:12px;color:var(--mute)">' + esc(p.account) + (p.adj ? ' · تسوية ' + (p.adj > 0 ? '+' : '') + fmt(p.adj) : '') + '</div></div><b>' + fmt(p.amount) + '</b><span style="font-size:20px">' + (p.done ? '✓' : '○') + '</span></div>';
+    });
+    h += '<button class="ghost" onclick="tab(\'more\')">رجوع</button>';
+  } else if (view === 'recon') {
+    h += '<div class="sec"><b>مطابقة الأرصدة</b></div><div class="hero"><div class="l">أول مرة: سجّل «رصيد البداية» لكل حساب. بعدها كل أسبوع اضغط «فحص» وقارن.</div></div>';
+    if (!accs.length) h += '<div style="color:var(--mute)">جاري التحميل…</div>';
+    accs.forEach(function (a, i) {
+      h += '<div class="box"><div class="rw"><b>' + esc(a.account) + '</b>' + (a.expected != null ? '<span class="chip">المتوقع ' + fmt(a.expected) + '</span>' : '<span class="chip">بلا بداية</span>') + '</div>' +
+        (a.last ? '<div style="font-size:12px;color:' + (Math.abs(a.last.diff) < 1 ? 'var(--green)' : 'var(--red)') + '">آخر فحص ' + esc(a.last.date) + ': الفرق ' + fmt(a.last.diff) + '</div>' : '') +
+        '<input class="note rb" data-a="' + esc(a.account) + '" type="number" inputmode="decimal" placeholder="الرصيد الفعلي من البنك"></div>';
+    });
+    h += '<button class="go" onclick="saveRecon(\'open\')">سجّل كرصيد بداية</button><button class="ghost" onclick="saveRecon(\'check\')">فحص ومقارنة</button><button class="ghost" onclick="tab(\'more\')">رجوع</button>';
   } else {
+    h += '<div class="sec"><b>أدوات</b></div><button class="env" onclick="tab(\'payday\')"><div class="r"><span class="n">يوم الراتب</span><span class="chip">قائمة التحويلات</span></div></button><button class="env" onclick="tab(\'recon\')"><div class="r"><span class="n">مطابقة الأرصدة</span><span class="chip">أسبوعياً</span></div></button>';
     h += '<div class="sec"><b>الإشعارات</b></div><div class="hero"><div class="l">الصق رابط خدمة الإشعارات ثم فعّلها. تعمل من التطبيق على الشاشة الرئيسية فقط.</div><input id="pushurl" class="note" style="direction:ltr;text-align:left" placeholder="https://...workers.dev" value="' + esc(lsGet('zarf_push') || '') + '"><button class="go" onclick="enablePush()">تفعيل الإشعارات</button></div>';
+    h += '<div class="sec"><b>دخل إضافي</b></div><div class="hero"><div class="l">يُقسم تلقائياً: 50% أبيان للاستثمار و50% الإنماء ادخار.</div><input id="isrc" class="note" placeholder="المصدر (تصوير، دعم، ...)"><input id="iamt" class="note" type="number" inputmode="decimal" placeholder="المبلغ"><button class="go" onclick="addIncome()">سجّل الدخل</button></div>';
     h += '<div class="sec"><b>المزيد</b></div><div class="hero"><div class="l">العمليات المحفوظة على الجوال: ' + queue().length + '</div><button class="ghost" onclick="load()">تحديث</button><button class="ghost" onclick="lsSet(\'zarf_token\',\'\');token=null;setup()">تغيير الرمز السري</button></div>';
     h += '<div class="sec"><b>الأظرف المحوَّلة</b></div>';
     state.envelopes.forEach(function (e) {
@@ -175,6 +218,21 @@ function render(offline) {
     });
   }
   $('main').innerHTML = h;
+}
+
+var rep = null, payday = [], accs = [];
+function togglePay(row, done) {
+  payday.forEach(function (p) { if (p.row === row) p.done = done; });
+  render();
+  post({ action: 'paydayDone', row: row, done: done }).catch(function () { toast('تعذّر الحفظ'); });
+}
+function saveRecon(kind) {
+  var b = {};
+  document.querySelectorAll('.rb').forEach(function (i) { if (i.value !== '') b[i.getAttribute('data-a')] = i.value; });
+  if (!Object.keys(b).length) { toast('اكتب رصيداً واحداً على الأقل'); return; }
+  post({ action: 'recon', kind: kind, balances: b }).then(function (r) {
+    if (!r.ok) throw new Error(r.error); accs = r.data; toast('تم الحفظ'); render();
+  }).catch(function (e) { toast(e.message || 'تعذّر الحفظ'); });
 }
 
 /* ---------- شاشة قبل ما أدفع ---------- */
@@ -251,6 +309,16 @@ function submitTx() {
     }
     $('go').disabled = false; $('go').textContent = 'تأكيد وتسجيل الدفعة'; toast(err.message || 'تعذّر التسجيل');
   });
+}
+
+function addIncome() {
+  var a = Number($('iamt').value);
+  if (!(a > 0)) { toast('اكتب المبلغ'); return; }
+  post({ action: 'income', amount: a, source: $('isrc').value, date: today() }).then(function (r) {
+    if (!r.ok) throw new Error(r.error || 'تعذّر التسجيل');
+    toast('أبيان ' + fmt(r.split.abyan) + ' · الإنماء ادخار ' + fmt(r.split.alinma));
+    $('iamt').value = ''; $('isrc').value = '';
+  }).catch(function (e) { toast(e.message || 'تعذّر التسجيل'); });
 }
 
 /* أيقونة الشاشة الرئيسية: تُرسم بخط الكوفي */
